@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Usuários no GitHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        input {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        img {
+            width: 50px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Busca de Usuários no GitHub</h2>
+        <input type="text" id="searchInput" placeholder="Digite o nome do usuário">
+        <button onclick="searchUsers()">Buscar</button>
+        <ul id="userList"></ul>
+    </div>
+
+    <script>
+        async function searchUsers() {
+            const query = document.getElementById('searchInput').value.trim();
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+
+            if (!query) {
+                alert('Digite um nome para buscar.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.github.com/search/users?q=${query}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach(user => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <img src="${user.avatar_url}" alt="Avatar">
+                            <a href="${user.html_url}" target="_blank">${user.login}</a>
+                        `;
+                        userList.appendChild(li);
+                    });
+                } else {
+                    userList.innerHTML = '<p>Não foram encontrados usuários para esta pesquisa.</p>';
+                }
+            } catch (error) {
+                console.error('Erro na busca:', error);
+                userList.innerHTML = '<p>Ocorreu um erro ao buscar usuários.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
