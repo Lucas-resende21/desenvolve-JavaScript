@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed de Gatinhos</title>
+    <script defer src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script defer src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="root" class="max-w-lg mx-auto mt-5"></div>
+    
+    <script type="text/babel">
+        function Feed() {
+            const [posts, setPosts] = React.useState([]);
+            const [text, setText] = React.useState("");
+
+            const fetchCatImage = async () => {
+                const response = await fetch("https://api.thecatapi.com/v1/images/search");
+                const data = await response.json();
+                return data[0].url;
+            };
+
+            const handlePost = async () => {
+                if (!text.trim()) return;
+                const catImage = await fetchCatImage();
+                const newPost = {
+                    id: Date.now(),
+                    username: "Usuário123",
+                    avatar: "https://i.pravatar.cc/40",
+                    text,
+                    catImage,
+                    likes: 0,
+                };
+                setPosts([newPost, ...posts]);
+                setText("");
+            };
+
+            const handleLike = (id) => {
+                setPosts(
+                    posts.map((post) =>
+                        post.id === id ? { ...post, likes: post.likes + 1 } : post
+                    )
+                );
+            };
+
+            return (
+                <div className="max-w-lg mx-auto mt-5">
+                    <div className="sticky top-0 bg-white p-4 border-b z-10">
+                        <textarea
+                            className="w-full border rounded p-2"
+                            rows="3"
+                            placeholder="O que você está pensando?"
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                        ></textarea>
+                        <button 
+                            onClick={handlePost} 
+                            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded">
+                            Postar
+                        </button>
+                    </div>
+
+                    <div className="mt-4 space-y-4">
+                        {posts.map((post) => (
+                            <div key={post.id} className="p-4 bg-white border rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <img
+                                        src={post.avatar}
+                                        alt="avatar"
+                                        className="w-10 h-10 rounded-full"
+                                    />
+                                    <span className="font-semibold">{post.username}</span>
+                                </div>
+                                <p className="mt-2">{post.text}</p>
+                                <img
+                                    src={post.catImage}
+                                    alt="Gatinho fofo"
+                                    className="w-full rounded-lg mt-2"
+                                />
+                                <div className="flex items-center gap-2 mt-2">
+                                    <button 
+                                        onClick={() => handleLike(post.id)} 
+                                        className="text-red-500 flex items-center gap-1">
+                                        ❤️ {post.likes}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Feed />, document.getElementById("root"));
+    </script>
+</body>
+</html>
